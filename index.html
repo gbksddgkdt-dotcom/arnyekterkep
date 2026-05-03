@@ -57,16 +57,17 @@
             .header-right { flex: 0 0 35% !important; display: flex !important; flex-direction: row !important; justify-content: flex-end !important; gap: 1.5rem !important; align-items: flex-end !important; }
             .header-right input { max-width: 160px !important; margin-top: 0 !important; font-size: 1.125rem !important; }
 
-            .grid-row { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; flex-grow: 1 !important; height: auto !important; gap: 0 !important; }
-            .col-1 { width: 23% !important; padding-right: 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 0.75rem !important; }
-            .col-2 { width: 37% !important; border-left: 1px solid #27272a !important; border-right: 1px solid #27272a !important; padding: 0 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 0.75rem !important; height: 100% !important; }
-            .col-3 { width: 40% !important; padding-left: 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 0.75rem !important; }
+            .grid-row { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; flex-grow: 1 !important; flex-shrink: 1 !important; height: 0 !important; min-height: 0 !important; gap: 0 !important; }
+            .col-1 { width: 23% !important; padding-right: 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 0.75rem !important; min-height: 0 !important; flex-shrink: 1 !important; }
+            .col-2 { width: 37% !important; border-left: 1px solid #27272a !important; border-right: 1px solid #27272a !important; padding: 0 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 0.75rem !important; flex-grow: 1 !important; min-height: 0 !important; flex-shrink: 1 !important; }
+            .col-3 { width: 40% !important; padding-left: 1.5rem !important; display: flex !important; flex-direction: column !important; gap: 0.75rem !important; min-height: 0 !important; flex-shrink: 1 !important; }
             
-            /* Szigorú magasságok és elrendezés nyomtatáskor az összeomlás ellen */
-            .svg-container { min-height: 500px !important; height: 500px !important; display: flex !important; justify-content: center !important; align-items: center !important; flex-grow: 1 !important; margin-top: 10px !important; overflow: visible !important; }
-            .interactive-area { height: 100% !important; width: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; }
-            .interactive-area > div.relative { height: 100% !important; max-height: 500px !important; width: 100% !important; }
-            .svg-container svg { height: 100% !important; max-height: 500px !important; width: 100% !important; max-width: 100% !important; background: transparent !important; overflow: visible !important; }
+            /* Rugalmas magasságok nyomtatáskor, hogy az ábrák zsugorodjanak a megnőtt szövegek javára */
+            .svg-container { min-height: 0 !important; height: 0 !important; display: flex !important; justify-content: center !important; align-items: center !important; flex-grow: 1 !important; flex-shrink: 1 !important; margin-top: 10px !important; overflow: visible !important; }
+            .interactive-area { height: 100% !important; width: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; min-height: 0 !important; }
+            .interactive-area > div.relative { height: 100% !important; max-height: 100% !important; width: auto !important; max-width: 100% !important; }
+            .svg-container svg { height: 100% !important; max-height: 100% !important; width: 100% !important; max-width: 100% !important; background: transparent !important; overflow: visible !important; }
+            .interactive-area canvas { width: 100% !important; height: 100% !important; object-fit: contain !important; }
             
             /* SVG filterek kikapcsolása PDF exportnál, mert eltüntethetik az elemeket */
             svg [filter], svg * { filter: none !important; }
@@ -75,9 +76,9 @@
             
             .digital-input { background: transparent !important; border: none !important; border-bottom: 2px dotted #71717a !important; padding: 4px 0 !important; border-radius: 0 !important; box-shadow: none !important; resize: none !important; }
 
-            .gap-10, .gap-8, .gap-6, .gap-12, .gap-5, .gap-4 { gap: 0.75rem !important; }
-            .mb-6, .mb-4, .mb-8, .mb-2 { margin-bottom: 0.5rem !important; }
-            .mt-8, .mt-6, .mt-4, .mt-2 { margin-top: 0.5rem !important; }
+            .gap-10, .gap-8, .gap-6, .gap-12, .gap-5, .gap-4 { gap: 0.5rem !important; }
+            .mb-6, .mb-4, .mb-8, .mb-2 { margin-bottom: 0.25rem !important; }
+            .mt-8, .mt-6, .mt-4, .mt-2 { margin-top: 0.25rem !important; }
         }
     </style>
 </head>
@@ -237,6 +238,12 @@
           
           const [nodes, setNodes] = useState(INITIAL_NODES.map(n => Object.assign({}, n, { state: 0 })));
 
+          // Ez a függvény felelős a szövegdobozok automatikus átméretezéséért!
+          const handleAutoResize = (e) => {
+            e.target.style.height = 'auto'; // Először visszaállítja auto-ra
+            e.target.style.height = e.target.scrollHeight + 'px'; // Majd beállítja az új szöveg magasságát
+          };
+
           const handleBodyTap = (x, y) => {
             setNodes(prev => prev.map(node => {
               if (Math.hypot(node.cx - x, node.cy - y) <= Math.max(node.r + 25, 40)) {
@@ -305,7 +312,12 @@
                 setRadarMarkers([]);
                 setClientData({ name: '', date: '' });
                 setCardImage(null);
-                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+                
+                // Szövegmezők tartalmának ÉS magasságának visszaállítása
+                document.querySelectorAll('textarea').forEach(ta => {
+                    ta.value = '';
+                    ta.style.height = 'auto';
+                });
             }
           };
 
@@ -383,9 +395,9 @@
                       </div>
                       <div className="flex flex-col gap-4 mt-2">
                         <h4 className="font-montserrat font-bold text-zinc-200 tracking-widest border-b border-zinc-700 pb-2 uppercase">A KIVETÜLÉS</h4>
-                        <div className="flex flex-col gap-1"><label className="text-[9px] font-bold uppercase text-zinc-500">Az elsődleges érzet</label><textarea rows="2" className="digital-input resize-none text-sm"></textarea></div>
-                        <div className="flex flex-col gap-1"><label className="text-[9px] font-bold uppercase text-zinc-500">A paradoxon (Ami nem illik a képbe)</label><textarea rows="2" className="digital-input resize-none text-sm"></textarea></div>
-                        <div className="flex flex-col gap-1"><label className="text-[9px] font-bold uppercase text-zinc-500">Az Árnyék mondata</label><textarea rows="2" className="digital-input resize-none font-bold italic text-[#eab308] text-sm" placeholder="„Én vagyok az, aki...”"></textarea></div>
+                        <div className="flex flex-col gap-1"><label className="text-[9px] font-bold uppercase text-zinc-500">Az elsődleges érzet</label><textarea rows="2" className="digital-input resize-none text-sm overflow-hidden" onInput={handleAutoResize}></textarea></div>
+                        <div className="flex flex-col gap-1"><label className="text-[9px] font-bold uppercase text-zinc-500">A paradoxon (Ami nem illik a képbe)</label><textarea rows="2" className="digital-input resize-none text-sm overflow-hidden" onInput={handleAutoResize}></textarea></div>
+                        <div className="flex flex-col gap-1"><label className="text-[9px] font-bold uppercase text-zinc-500">Az Árnyék mondata</label><textarea rows="2" className="digital-input resize-none font-bold italic text-[#eab308] text-sm overflow-hidden" placeholder="„Én vagyok az, aki...”" onInput={handleAutoResize}></textarea></div>
                       </div>
                     </section>
 
@@ -425,11 +437,11 @@
                         <h3 className="font-montserrat font-bold text-xl text-zinc-300 uppercase tracking-widest">KOGNITÍV HUROK</h3>
                         <div className="bg-zinc-800/20 border border-zinc-700/60 p-4 pt-6 rounded-lg relative">
                           <div className="absolute -top-3 left-4 bg-[#18181b] px-2 text-[11px] font-bold text-zinc-300 uppercase tracking-widest">A „Kell” illúziója</div>
-                          <textarea rows="2" className="digital-input resize-none w-full text-sm" placeholder="(Megfelelési kényszer)"></textarea>
+                          <textarea rows="2" className="digital-input resize-none w-full text-sm overflow-hidden" placeholder="(Megfelelési kényszer)" onInput={handleAutoResize}></textarea>
                         </div>
                         <div className="bg-zinc-800/20 border border-zinc-700/60 p-4 pt-6 rounded-lg relative">
                           <div className="absolute -top-3 left-4 bg-[#18181b] px-2 text-[11px] font-bold text-zinc-300 uppercase tracking-widest">A Félelem gombja</div>
-                          <textarea rows="2" className="digital-input resize-none w-full text-sm" placeholder="(Mi történik, ha leteszem a páncélt?)"></textarea>
+                          <textarea rows="2" className="digital-input resize-none w-full text-sm overflow-hidden" placeholder="(Mi történik, ha leteszem a páncélt?)" onInput={handleAutoResize}></textarea>
                         </div>
                       </div>
 
@@ -485,7 +497,7 @@
                         <span className="text-zinc-100 font-bold text-2xl">✦</span>
                         <h2 className="font-montserrat font-bold text-xl tracking-[0.2em] uppercase text-zinc-100">AZ INTEGRÁCIÓ LÉPÉSE</h2>
                       </div>
-                      <div className="pl-9"><textarea rows="2" className="digital-input font-bold text-lg resize-none border-b-2" placeholder="Írd le a konkrét mikrolépést..."></textarea></div>
+                      <div className="pl-9"><textarea rows="2" className="digital-input font-bold text-lg resize-none border-b-2 overflow-hidden" placeholder="Írd le a konkrét mikrolépést..." onInput={handleAutoResize}></textarea></div>
                     </div>
                   </footer>
 
