@@ -451,13 +451,19 @@
                     </section>
                   </main>
 
-                  <footer className="mt-2 pt-6 border-t border-zinc-700 w-full shrink-0">
+                  <footer className="mt-2 pt-6 border-t border-zinc-700 w-full shrink-0 flex flex-col gap-6">
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-3">
                         <span className="text-zinc-100 font-bold text-2xl">✦</span>
                         <h2 className="font-montserrat font-bold text-xl tracking-[0.2em] uppercase text-zinc-100">AZ INTEGRÁCIÓ LÉPÉSE</h2>
                       </div>
                       <div className="pl-9"><textarea rows="2" className="digital-input font-bold text-lg resize-none border-b-2 overflow-hidden" placeholder="Írd le a konkrét mikrolépést..." onInput={handleAutoResize}></textarea></div>
+                    </div>
+                    
+                    {/* Szerzői jog és AI támogatás megjegyzés */}
+                    <div className="flex justify-between items-center text-[8px] sm:text-[9px] text-zinc-500 uppercase tracking-widest pt-3 border-t border-zinc-800/50">
+                      <span>© {new Date().getFullYear()} Surányi Zoltán Coach. Minden jog fenntartva.</span>
+                      <span>Készült AI támogatással</span>
                     </div>
                   </footer>
 
