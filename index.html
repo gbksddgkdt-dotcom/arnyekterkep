@@ -225,7 +225,6 @@
           const [clientData, setClientData] = useState({ name: '', date: '' });
           const [cardImage, setCardImage] = useState(null);
           const [radarMarkers, setRadarMarkers] = useState([]);
-          const [showInstallModal, setShowInstallModal] = useState(false);
           
           const INITIAL_NODES = [
             { id: 0, cx: 150, cy: 50, r: 18 }, { id: 1, cx: 150, cy: 110, r: 8 }, { id: 2, cx: 90, cy: 130, r: 6 },   
@@ -291,15 +290,6 @@
           };
           const radarLevels = [24, 49, 74, 99, 124, 149, 174, 199, 224, 245];
 
-          const handleDownloadSelf = () => {
-            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url; link.download = 'Vezetoi-Arnyek-Terkep-App.html';
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-          };
-
           const handleClearAll = () => {
             if(window.confirm("Biztosan törölsz minden rajzot, fotót és szöveget?")) {
                 if (bodyCanvasRef && bodyCanvasRef.current) {
@@ -324,33 +314,6 @@
           return (
             <div className="min-h-screen flex flex-col items-center py-2 sm:py-4 md:py-8 w-full relative">
               
-              {/* iPhone Telepítési Útmutató Modal */}
-              {showInstallModal && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 backdrop-blur-sm print-hidden">
-                  <div className="bg-[#18181b] border border-zinc-700 p-6 md:p-8 rounded-2xl max-w-xl w-full shadow-2xl relative">
-                    <button onClick={() => setShowInstallModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
-                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                    <div className="flex items-center gap-3 mb-6">
-                      <span className="text-3xl">📱</span>
-                      <h2 className="font-montserrat font-bold text-xl text-zinc-100 uppercase">iPhone App Telepítése</h2>
-                    </div>
-                    <p className="text-zinc-300 text-sm mb-4">Az Apple szigorú biztonsági szabályai miatt a telefonról megnyitott fájlokon a rendszer letiltja a rajzolást és a kattintást. <strong>A tökéletes App élményhez a Safariból kell a Főképernyőhöz adnod. Ezt így teheted meg 2 perc alatt:</strong></p>
-                    
-                    <ol className="list-decimal pl-5 text-sm text-zinc-400 space-y-3 font-semibold mb-6">
-                      <li>Töltsd le ezt a fájlt a gépedre a kék <span className="text-blue-400">PC LETÖLTÉS</span> gombbal.</li>
-                      <li>Nyisd meg a Mac-eden/PC-den az ingyenes <a href="https://tiiny.host" target="_blank" className="text-yellow-500 hover:underline">tiiny.host</a> vagy a <a href="https://app.netlify.com/drop" target="_blank" className="text-yellow-500 hover:underline">Netlify Drop</a> oldalt.</li>
-                      <li>Húzd be a letöltött fájlt az oldalra (regisztráció nélkül is feltölti, és ad egy saját linket).</li>
-                      <li>Ezt a kapott webcímet (linket) nyisd meg az iPhone-odon a <b>Safari</b> böngészőben!</li>
-                      <li>Bökj a Safari alján lévő <b>Megosztás ikonra</b> (négyzet felfelé mutató nyíllal), majd válaszd a <b>Főképernyőhöz adás</b> opciót.</li>
-                    </ol>
-                    <div className="bg-green-900/30 border border-green-800 p-3 rounded-lg text-xs text-green-400">
-                       ✅ Kész! Innentől az Árnyék-Térkép egy önálló, teljes képernyős, saját ikonnal rendelkező, korlátozások nélkül működő alkalmazás lesz a telefonodon!
-                    </div>
-                  </div>
-                </div>
-              )}
-
               <div className="app-container w-full max-w-[1587px] flex flex-col gap-4 sm:gap-6 px-2 sm:px-4">
                 
                 {/* VEZÉRLŐPULT */}
@@ -359,13 +322,10 @@
                     <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 shadow-inner">⚡</div>
                     <div>
                       <h2 className="font-montserrat font-bold text-zinc-100 text-xs sm:text-sm uppercase tracking-tighter">Árnyék-Térkép App</h2>
-                      <p className="text-[10px] text-zinc-400">iPhone-on olvasd el a lila gomb instrukcióit!</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap lg:flex-nowrap justify-center gap-2 sm:gap-3 w-full lg:w-auto">
                     <button onClick={handleClearAll} className="px-3 sm:px-4 py-2 rounded-lg font-bold text-[10px] bg-zinc-800 hover:bg-red-900/30 hover:text-red-400 text-zinc-300 border border-zinc-700 transition-colors">MINDEN TÖRLÉSE</button>
-                    <button onClick={handleDownloadSelf} className="px-3 sm:px-4 py-2 rounded-lg font-montserrat font-bold text-[10px] bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all">📥 PC LETÖLTÉS</button>
-                    <button onClick={() => setShowInstallModal(true)} className="px-3 sm:px-4 py-2 rounded-lg font-montserrat font-bold text-[10px] bg-purple-600 hover:bg-purple-500 text-white shadow-lg transition-all">📱 iPHONE TELEPÍTÉS</button>
                     <button onClick={() => window.print()} className="px-5 py-2 rounded-lg font-montserrat font-bold text-[10px] bg-yellow-500 hover:bg-yellow-400 text-zinc-900 shadow-lg transition-all">📄 PDF MENTÉS</button>
                   </div>
                 </div>
